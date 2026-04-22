@@ -67,8 +67,28 @@ public class TwilioController {
         ));
     }
 
+    /*@GetMapping(value = "/twiml/preview", produces = MediaType.APPLICATION_XML_VALUE)
+    public String previewTwiml(@RequestParam(required = false) String message, @RequestParam(required = false) String audioUrl) {
+        return twilioServices.buildCustomTwiml(message, audioUrl);
+    }*/
+
     @GetMapping(value = "/twiml/preview", produces = MediaType.APPLICATION_XML_VALUE)
     public String previewTwiml(@RequestParam(required = false) String message, @RequestParam(required = false) String audioUrl) {
         return twilioServices.buildCustomTwiml(message, audioUrl);
+    }
+
+    @PostMapping("/calls/local-audio")
+    public ResponseEntity<Map<String, String>> makeCallWithLocalAudio(
+            @RequestParam String to,
+            @RequestParam(required = false) String message,
+            @RequestParam String audioFileName) {
+
+        Call call = twilioServices.makeCallWithLocalAudio(to, message, audioFileName);
+
+        return ResponseEntity.ok(Map.of(
+                "status", "initiated",
+                "callSid", call.getSid(),
+                "audioFile", audioFileName
+        ));
     }
 }

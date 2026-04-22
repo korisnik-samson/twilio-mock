@@ -27,6 +27,9 @@ public class TwilioServices {
     @Value("${twilio.phone.number}")
     private String twilioPhoneNumber;
 
+    @Value("${twilio.base.url}")
+    private String baseUrl;
+
     public void sendSMS() { }
 
     public Call makeCall(String toPhoneNumber, Twiml twimlUrl) {
@@ -37,6 +40,21 @@ public class TwilioServices {
         ).create();
 
         log.info("Call initiated with SID: {}", call.getSid());
+
+        return call;
+    }
+
+    public Call makeCallWithLocalAudio(String toPhoneNumber, String message, String audioFileName) {
+        String audioUrl = baseUrl + "/audio/" + audioFileName;
+        String twiml = buildCustomTwiml(message, audioUrl);
+
+        Call call = Call.creator(
+                new PhoneNumber(toPhoneNumber),
+                new PhoneNumber(twilioPhoneNumber),
+                new Twiml(twiml)
+        ).create();
+
+        log.info("Call initiated with SID: {} using local audio: {}", call.getSid(), audioUrl);
 
         return call;
     }

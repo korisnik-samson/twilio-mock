@@ -1,24 +1,32 @@
 package org.samson.twilio.config;
 
 import com.twilio.Twilio;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Slf4j
+@Configuration
 public class TwilioConfig {
 
-    private final String accountSid;
-    private final String authToken;
+    @Value("${twilio.account.sid}")
+    private String accountSid;
 
-    @Autowired
-    public TwilioConfig(
-            @Value("${twilio.account-sid}") String accountSid,
-            @Value("${twilio.auth-token}") String authToken
-    ) {
-        this.accountSid = accountSid;
-        this.authToken = authToken;
+    @Value("${twilio.auth.token}")
+    private String authToken;
+
+    @PostConstruct
+    public void initTwilio() {
+        // log.info("Initializing Twilio with Account SID: {}", accountSid);
+
+        if (accountSid == null || accountSid.isBlank() || authToken == null || authToken.isBlank()) {
+            log.error("Twilio credentials are missing or empty!");
+            throw new IllegalStateException("Twilio credentials not configured properly");
+        }
+
+        Twilio.init(accountSid, authToken);
+
+        log.info("Twilio SDK initialized successfully");
     }
-
-    public void initTwilio() { Twilio.init(accountSid, authToken); }
 }
